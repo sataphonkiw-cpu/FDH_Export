@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDH 16 แฟ้ม — Dashboard & Fee Schedule</title>
+<style>
+:root{--bg:#0f172a;--panel:#1e293b;--panel2:#273449;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--line:#334155}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+aside{width:230px;background:var(--panel);padding:18px 14px;position:sticky;top:0;height:100vh}
+aside h1{font-size:15px;color:var(--acc);margin-bottom:4px}
+aside p{font-size:11px;color:var(--mut);margin-bottom:18px;line-height:1.5}
+.nav-btn{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:8px;color:var(--mut);padding:10px 12px;font-size:13px;cursor:pointer;margin-bottom:6px}
+.nav-btn:hover{background:var(--panel2);color:var(--txt)}
+.nav-btn.active{background:var(--panel2);border-color:var(--acc);color:var(--acc)}
+main{flex:1;padding:22px 26px;max-width:1200px}
+.view{display:none}.view.active{display:block}
+h2{font-size:18px;margin-bottom:4px}
+.sub{color:var(--mut);font-size:12px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.card h3{font-size:13px;color:var(--acc);margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=date],input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:7px 9px;font-size:12px}
+button.act{background:var(--acc);color:#082f49;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer}
+button.act:disabled{opacity:.5;cursor:wait}
+button.ghost{background:none;border:1px solid var(--line);color:var(--mut);border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer}
+.msg{font-size:12px;color:var(--mut);margin-top:8px}
+.msg.ok{color:var(--ok)}.msg.err{color:var(--bad)}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;min-width:110px}
+.chip .n{font-size:20px;font-weight:700}.chip .l{font-size:11px;color:var(--mut)}
+.chip.t .n{color:var(--acc)}.chip.p .n{color:var(--ok)}.chip.f .n{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--mut);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid rgba(51,65,85,.5);vertical-align:top}
+tr:hover td{background:rgba(56,189,248,.05)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge.pass{background:rgba(74,222,128,.15);color:var(--ok)}
+.badge.fix{background:rgba(251,191,36,.15);color:var(--warn)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.dot.y{background:var(--ok)}.dot.n{background:var(--bad)}
+.empty{color:var(--mut);text-align:center;padding:24px}
+.fund-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.fund{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.fund .fn{font-size:12px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.fund .vv{font-size:18px;font-weight:700}
+.fund .mm{font-size:11px;color:var(--mut);margin-top:4px}
+.plan-item{background:var(--panel2);border-left:3px solid var(--warn);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:12px;line-height:1.6}
+.plan-item .ph{font-weight:700;margin-bottom:4px}
+code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--warn)}
+</style>
+</head>
+<body>
+<aside>
+  <h1>FDH 16 แฟ้ม</h1>
+  <p>ศูนย์กลางข้อมูลด้านการเงิน (Financial Data Hub) — กองทุนประกันสุขภาพคนต่างด้าวและแรงงานต่างด้าว</p>
+  <button class="nav-btn active" data-view="fdh">📊 FDH Dashboard</button>
+  <button class="nav-btn" data-view="ca">💉 ส่งเบิก Fee Schedule (CA 90004)</button>
+</aside>
+<main>
+<!-- ============ VIEW 1: FDH DASHBOARD ============ -->
+<section id="view-fdh" class="view active">
+  <h2>FDH Dashboard — 16 แฟ้ม / 7 กองทุน</h2>
+  <p class="sub">แยกยอดเบิกตามกองทุนและหมวด 16 แฟ้ม (CHRGITEM) — โหลดข้อมูลสดจาก HOSxP ตามช่วงวันที่</p>
+
+  <div class="card">
+    <h3>เลือกช่วงวันที่ — โหลดข้อมูลสดจาก HOSxP</h3>
+    <div class="row">
+      <input type="date" id="dFrom"><span style="color:var(--mut)">–</span><input type="date" id="dTo">
+      <button class="act" id="btnFdHLoad">⟳ โหลดข้อมูลสด</button>
+      <button class="ghost" id="btnFdHReset">↺ ล้าง</button>
+    </div>
+    <div class="msg" id="fdhMsg">ยังไม่ได้โหลดข้อมูล — เลือกช่วงวันที่แล้วกด "⟳ โหลดข้อมูลสด" (ใช้ bmsData.sql)</div>
+  </div>
+
+  <div class="chips">
+    <div class="chip t"><div class="n" id="fdhVisits">–</div><div class="l">Visit</div></div>
+    <div class="chip t"><div class="n" id="fdhItems">–</div><div class="l">รายการ</div></div>
+    <div class="chip p"><div class="n" id="fdhTotal">–</div><div class="l">ยอดรวม (บาท)</div></div>
+  </div>
+
+  <div class="card">
+    <h3>แยกตามกองทุน (7 กองทุน FDH)</h3>
+    <div class="fund-grid" id="fundGrid"></div>
+  </div>
+
+  <div class="card">
+    <h3>หมวด 16 แฟ้ม — CHRGITEM / ADP TYPE (อ้างอิง)</h3>
+    <table>
+      <thead><tr><th>#</th><th>หมวด</th><th>CHRGITEM (เบิกได้)</th><th>CHRGITEM (ส่วนเกิน)</th><th>ADP TYPE</th></tr></thead>
+      <tbody id="catBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ตัวอย่างรายการล่าสุด (50 แรกในช่วง)</h3>
+    <table>
+      <thead><tr><th>วันที่</th><th>HN</th><th>VN</th><th>กองทุน</th><th>รายการ</th><th>ยอด (บาท)</th></tr></thead>
+      <tbody id="fdhSample"><tr><td colspan="6" class="empty">ยังไม่มีข้อมูล</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ VIEW 2: CA FEE SCHEDULE ============ -->
+<section id="view-ca" class="view">
+  <h2>ส่งเบิก Fee Schedule — CA Oral Screening (ADP 90004)</h2>
+  <p class="sub">คัดกรองผู้เข้าเงื่อนไข 7 ข้อ: ADP 90004 · ไทย · อายุ ≥ 40 · กองทุน UC/ข้าราชการ/ประกันสังคม · Z128 · ICD-9 2721–2724/2729 · ไม่มี WALKIN/ER-EXT</p>
+
+  <div class="card">
+    <h3>เลือกช่วงวันที่ — โหลดข้อมูลสดจาก HOSxP</h3>
+    <div class="row">
+      <input type="date" id="caFrom"><span style="color:var(--mut)">–</span><input type="date" id="caTo">
+      <button class="act" id="btnCaRange">⟳ โหลดตามช่วงวันที่</button>
+      <button class="ghost" id="btnCaRangeReset">↺ ทั้งหมด</button>
+      <button class="act" id="btnLoadLive">⟳ โหลดข้อมูลสด (ทั้งหมด)</button>
+    </div>
+    <div class="msg" id="caRangeMsg"></div>
+  </div>
+
+  <div class="chips">
+    <div class="chip t"><div class="n" id="chTotal">0</div><div class="l">ผู้เข้ารับบริการ</div></div>
+    <div class="chip p"><div class="n" id="chPass">0</div><div class="l">ผ่านทั้ง 7 เงื่อนไข</div></div>
+    <div class="chip f"><div class="n" id="chFix">0</div><div class="l">ต้องแก้ไข</div></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:10px">
+      <input type="text" id="caHn" placeholder="ค้นหา HN / VN / ชื่อ / กองทุน..." style="flex:1;min-width:220px">
+      <select id="caFilter" style="background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:7px 9px;font-size:12px">
+        <option value="">ทั้งหมด</option><option value="pass">ผ่านทั้งหมด</option><option value="fix">ต้องแก้ไข</option>
+      </select>
+    </div>
+    <table>
+      <thead><tr>
+        <th>วันที่</th><th>HN</th><th>ชื่อ</th><th>อายุ</th><th>ชาติ</th><th>กองทุน</th>
+        <th>Z128</th><th>ICD-9</th><th>WALKIN/ER</th><th>สถานะ</th>
+      </tr></thead>
+      <tbody id="caTable"></tbody>
+    </table>
+    <div class="msg" id="caCount"></div>
+  </div>
+
+  <div class="card" id="planCard" style="display:none">
+    <h3>แผนการแก้ไข (Copy ไปทำใน HOSxP — ไม่เขียนข้อมูล)</h3>
+    <div id="planBody"></div>
+  </div>
+</section>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
